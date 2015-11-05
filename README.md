@@ -12,7 +12,7 @@
 
 * 以下所有 API 使用的 HTTP Method 均为 `GET`
 
-# API 分析
+# API 分析 
 
 ### 1. 启动界面图像获取
 * URL: `http://news-at.zhihu.com/api/4/start-image/1080*1776`  
