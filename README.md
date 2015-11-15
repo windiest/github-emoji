@@ -312,6 +312,8 @@ Nature
 :partly_sunny:
 :octocat:
 :squirrel:
+
+
 Objects
 
 :bamboo:
@@ -575,6 +577,8 @@ Objects
 :eggplant:
 :tomato:
 :corn:
+
+
 Places
 
 :house:
@@ -683,6 +687,8 @@ Places
 :gb:
 :uk:
 :de:
+
+
 Symbols
 
 :one:
