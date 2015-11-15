@@ -1,425 +1,905 @@
-# 声明
-
-以下所有 API 均采取非正常手段获取。获取与共享之行为或有侵犯知乎权益的嫌疑。若被告知需停止共享与使用，本人会及时删除此页面与整个项目。
-请您暸解相关情况，并遵守知乎协议。
-
-# API 说明
-* 知乎日报的消息以 JSON 格式输出
-
-* 网址中 `api` 后数字代表 API 版本，过高或过低均会得到错误信息
-
-* 较老的接口（启动界面图像获取，最新消息，过往消息）中将数字 2 替换为 1.2 获得效果相同，替换为 1.1 获得的是老版本 API 输出的 JSON 格式（替换为更低，如 1.0，或更高，如 1.3，将会获得错误消息）
-
-* 以下所有 API 使用的 HTTP Method 均为 `GET`
-
-# API 分析
-
-### 1. 启动界面图像获取
-* URL: `http://news-at.zhihu.com/api/4/start-image/1080*1776`  
-* `start-image` 后为图像分辨率，接受如下格式  
-
-    * `320*432`
-    * `480*728`
-    * `720*1184`
-    * `1080*1776`  
-
-* 响应实例：
-
-        {
-            text: "© Fido Dido",
-            img: "http://p2.zhimg.com/10/7b/107bb4894b46d75a892da6fa80ef504a.jpg"
-        }  
-
-* 分析：
-    * `text` : 供显示的图片版权信息
-    * `img` : 图像的 URL
-
-
-### 2. 软件版本查询
-* Android: `http://news-at.zhihu.com/api/4/version/android/2.3.0`
-* iOS: `http://news-at.zhihu.com/api/4/version/ios/2.3.0`
-* URL 最后部分的数字代表所安装『知乎日报』的版本
-* 响应实例：  
-
-    软件为最新版本时
-
-        {
-            "status": 0,
-            "latest": "2.2.0"
-        }
-
-    软件为较老版本时
-
-        {
-            "status": 1,
-            "msg": "【更新内容】（后略）",
-            "latest": "2.2.0"
-        }
-
-* 分析：
-    * `status` : 0 代表软件为最新版本，1 代表软件需要升级
-    * `latest` : 软件最新版本的版本号（数字的第二段会比最新的版本号低 1）
-    * `msg` : 仅出现在软件需要升级的情形下，提示用户升级软件的对话框中显示的消息
-
-
-### 3. 最新消息
-* URL: `http://news-at.zhihu.com/api/4/news/latest`  
-* 响应实例：
-
-        {
-            date: "20140523",
-            stories: [
-                {
-                    title: "中国古代家具发展到今天有两个高峰，一个两宋一个明末（多图）",
-                    ga_prefix: "052321",
-                    images: [
-                        "http://p1.zhimg.com/45/b9/45b9f057fc1957ed2c946814342c0f02.jpg"
-                    ],
-                    type: 0,
-                    id: 3930445
-                },
-            ...
-            ],
-            top_stories: [
-                {
-                    title: "商场和很多人家里，竹制家具越来越多（多图）",
-                    image: "http://p2.zhimg.com/9a/15/9a1570bb9e5fa53ae9fb9269a56ee019.jpg",
-                    ga_prefix: "052315",
-                    type: 0,
-                    id: 3930883
-                },
-            ...
-            ]
-        }
-
-* 分析：
-    * `date` : 日期
-    * `stories` : 当日新闻
-        * `title` : 新闻标题
-        * `images` : 图像地址（官方 API 使用数组形式。目前暂未有使用多张图片的情形出现，__曾见无__ `images` __属性的情况__，请在使用中注意 ）
-        * `ga_prefix` : 供 Google Analytics 使用
-        * `type` : 作用未知
-        * `id` : `url` 与 `share_url` 中最后的数字（应为内容的 id）
-        * `multipic` : 消息是否包含多张图片（仅出现在包含多图的新闻中）
-    * `top_stories` : 界面顶部 ViewPager 滚动显示的显示内容（子项格式同上）
-
-
-### 4. 消息内容获取与离线下载
-* URL: `http://news-at.zhihu.com/api/4/news/3892357`  
-* 使用在 `最新消息` 中获得的 `id`，拼接在 `http://news-at.zhihu.com/api/4/news/` 后，得到对应消息 JSON 格式的内容
-* 响应实例：
-
-        {
-            body: "<div class="main-wrap content-wrap">...</div>",
-            image_source: "Yestone.com 版权图片库",
-            title: "深夜惊奇 · 朋友圈错觉",
-            image: "http://pic3.zhimg.com/2d41a1d1ebf37fb699795e78db76b5c2.jpg",
-            share_url: "http://daily.zhihu.com/story/4772126",
-            js: [ ],
-            recommenders": [
-                { "avatar": "http://pic2.zhimg.com/fcb7039c1_m.jpg" },
-                { "avatar": "http://pic1.zhimg.com/29191527c_m.jpg" },
-                { "avatar": "http://pic4.zhimg.com/e6637a38d22475432c76e6c9e46336fb_m.jpg" },
-                { "avatar": "http://pic1.zhimg.com/bd751e76463e94aa10c7ed2529738314_m.jpg" },
-                { "avatar": "http://pic1.zhimg.com/4766e0648_m.jpg" }
-            ],
-            ga_prefix: "050615",
-            section": {
-                "thumbnail": "http://pic4.zhimg.com/6a1ddebda9e8899811c4c169b92c35b3.jpg",
-                "id": 1,
-                "name": "深夜惊奇"
-            },
-            type: 0,
-            id: 4772126,
-            css: [
-                "http://news.at.zhihu.com/css/news_qa.auto.css?v=1edab"
-            ]
-        }
-
-* 分析：
-    * `body` : HTML 格式的新闻
-    * `image-source` : 图片的内容提供方。为了避免被起诉非法使用图片，在显示图片时最好附上其版权信息。
-    * `title` : 新闻标题
-    * `image` : 获得的图片同 `最新消息` 获得的图片分辨率不同。这里获得的是在文章浏览界面中使用的大图。
-    * `share_url` : 供在线查看内容与分享至 SNS 用的 URL
-    * `js` : 供手机端的 WebView(UIWebView) 使用
-    * `recommenders` : 这篇文章的推荐者
-    * `ga_prefix` : 供 Google Analytics 使用
-    * `section` : 栏目的信息
-        * `thumbnail` : 栏目的缩略图
-        * `id` : 该栏目的 `id`
-        * `name` : 该栏目的名称
-    * `type` : 新闻的类型
-    * `id` : 新闻的 id
-    * `css` : 供手机端的 WebView(UIWebView) 使用
-        * 可知，知乎日报的文章浏览界面利用 WebView(UIWebView) 实现
-
-* __特别注意__  
-    在较为特殊的情况下，知乎日报可能将某个主题日报的站外文章推送至知乎日报首页。  
-    响应实例：
-
-        {
-            "theme_name": "电影日报",
-            "title": "五分钟读懂明星的花样昵称：一美、法鲨……",
-            "share_url": "http://daily.zhihu.com/story/3942319",
-            "js": [],
-            "ga_prefix": "052921",
-            "editor_name": "邹波",
-            "theme_id": 3,
-            "type": 1,
-            "id": 3942319,
-            "css": [
-                "http://news.at.zhihu.com/css/news_qa.6.css?v=b390f"
-            ]
-        }
-
-    此时返回的 JSON 数据缺少 `body`，`image-source`，`image`，`js` 属性。多出 `theme_name`，`editor_name`，`theme_id` 三个属性。`type` 由 `0` 变为 `1`。
-
-
-### 5. 过往消息
-* URL: `http://news.at.zhihu.com/api/4/news/before/20131119`  
-* __若果需要查询 11 月 18 日的消息，__`before` __后的数字应为__ `20131119`  
-* __知乎日报的生日为 2013 年 5 月 19 日，若__ `before` __后数字小于__ `20130520` __，只会接收到空消息__  
-* 输入的今日之后的日期仍然获得今日内容，但是格式不同于最新消息的 JSON 格式  
-* 响应实例：
-
-        {
-            date: "20131118",
-            stories: [
-                {
-                    title: "深夜食堂 · 我的张曼妮",
-                    ga_prefix: "111822",
-                    images: [
-                        "http://p4.zhimg.com/7b/c8/7bc8ef5947b069513c51e4b9521b5c82.jpg"
-                    ],
-                    type: 0,
-                    id: 1747159
-                },
-            ...
-            ]
-        }
-
-* 格式与前同，恕不再赘述
-
-
-### 6. 新闻额外信息
-* URL: `http://news-at.zhihu.com/api/4/story-extra/#{id}`  
-* 输入新闻的ID，获取对应新闻的额外信息，如评论数量，所获的『赞』的数量。
-* 响应实例：
-
-        {
-            "long_comments": 0,
-            "popularity": 161,
-            "short_comments": 19,
-            "comments": 19,
-        }
-
-* 分析：
-    * `long_comments` : 长评论总数
-    * `popularity` : 点赞总数
-    * `short_comments` : 短评论总数
-    * `comments` : 评论总数
-
-
-### 7. 新闻对应长评论查看
-* URL: `http://news-at.zhihu.com/api/4/story/4232852/long-comments`
-* 使用在 `最新消息` 中获得的 `id`，在 `http://news-at.zhihu.com/api/4/story/#{id}/long-comments` 中将 `id` 替换为对应的 `id`，得到长评论 JSON 格式的内容
-* 响应实例：
-
-        {
-            "comments": [
-                {
-                    "author": "EleganceWorld",
-                    "id": 545442,
-                    "content": "上海到济南，无尽的猪排盖饭… （后略）",
-                    "likes": 0,
-                    "time": 1413589303,
-                    "avatar": "http://pic2.zhimg.com/1f76e6a25_im.jpg"
-                },
-                ...
-            ]
-        }
-
-* 分析：
-    * `comments` : 长评论列表，形式为数组（请注意，其长度可能为 0）
-        * `author` : 评论作者
-        * `id` : 评论者的唯一标识符
-        * `content` : 评论的内容
-        * `likes` : 评论所获『赞』的数量
-        * `time` : 评论时间
-        * `avatar` : 用户头像图片的地址
-
-
-### 8. 新闻对应短评论查看
-* URL: `http://news-at.zhihu.com/api/4/story/4232852/short-comments`
-* 使用在 `最新消息` 中获得的 `id`，在 `http://news-at.zhihu.com/api/4/story/#{id}/short-comments` 中将 `id` 替换为对应的 `id`，得到短评论 JSON 格式的内容
-* 响应实例：
-
-        {
-            "comments": [
-                {
-                    "author": "Xiaole说",
-                    "id": 545721,
-                    "content": "就吃了个花生米，呵呵",
-                    "likes": 0,
-                    "time": 1413600071,
-                    "avatar": "http://pic1.zhimg.com/c41f035ab_im.jpg"
-                },
-                ...
-            ]
-        }
-
-* 格式与前同，恕不再赘述
-
-
-### 9. 主题日报列表查看
-* URL: `http://news-at.zhihu.com/api/4/themes`
-* 响应实例：
-
-        {
-            "limit": 1000,
-            "subscribed": [ ],
-            "others": [
-                {
-                    "color": 8307764,
-                    "thumbnail": "http://pic4.zhimg.com/2c38a96e84b5cc8331a901920a87ea71.jpg",
-                    "description": "内容由知乎用户推荐，海纳主题百万，趣味上天入地",
-                    "id": 12,
-                    "name": "用户推荐日报"
-                },
-                ...
-            ]
-        }
-
-    * 分析：
-        * `limit` : 返回数目之限制（仅为猜测）
-        * `subscribed` : 已订阅条目
-        * `others` : 其他条目
-            * `color` : 颜色，作用未知
-            * `thumbnail` : 供显示的图片地址
-            * `description` : 主题日报的介绍
-            * `id` : 该主题日报的编号
-            * `name` : 供显示的主题日报名称
-
-
-### 10. 主题日报内容查看
-* URL: `http://news-at.zhihu.com/api/4/theme/11`
-* 使用在 `主题日报列表查看` 中获得需要查看的主题日报的 `id`，拼接在 `http://news-at.zhihu.com/api/4/theme/` 后，得到对应主题日报 JSON 格式的内容
-* 响应实例：
-
-        {
-            stories: [
-                {
-                    images: [
-                        "http://pic1.zhimg.com/84dadf360399e0de406c133153fc4ab8_t.jpg"
-                    ],
-                    type: 0,
-                    id: 4239728,
-                    title: "前苏联监狱纹身百科图鉴"
-                },
-                ...
-            ],
-            description: "为你发现最有趣的新鲜事，建议在 WiFi 下查看",
-            background: "http://pic1.zhimg.com/a5128188ed788005ad50840a42079c41.jpg",
-            color: 8307764,
-            name: "不许无聊",
-            image: "http://pic3.zhimg.com/da1fcaf6a02d1223d130d5b106e828b9.jpg",
-            editors: [
-                {
-                    url: "http://www.zhihu.com/people/wezeit",
-                    bio: "微在 Wezeit 主编",
-                    id: 70,
-                    avatar: "http://pic4.zhimg.com/068311926_m.jpg",
-                    name: "益康糯米"
-                },
-                ...
-            ],
-            image_source: ""
-        }
-
-    * 分析：
-        * `stories` : 该主题日报中的文章列表
-            * `images` : 图像地址（其类型为数组。请留意在代码中处理无该属性与数组长度为 0 的情况）
-            * `type` : 类型，作用未知
-            * `title` : 消息的标题
-        * `description` : 该主题日报的介绍
-        * `background` : 该主题日报的背景图片（大图）
-        * `color` : 颜色，作用未知
-        * `name` : 该主题日报的名称
-        * `image` : 背景图片的小图版本
-        * `editors` : 该主题日报的编辑（『用户推荐日报』中此项的指是一个空数组，在 App 中的主编栏显示为『许多人』，点击后访问该主题日报的介绍页面，请留意）
-            * `url` : 主编的知乎用户主页
-            * `bio` : 主编的个人简介
-            * `id` : 数据库中的唯一表示符
-            * `avatar` : 主编的头像
-            * `name` : 主编的姓名
-        * `image_source` : 图像的版权信息
-
-
-### 11. 热门消息
-* __请注意！__ 此 API 仍可访问，但是其内容未出现在最新的『知乎日报』 App 中。
-* URL: `http://news-at.zhihu.com/api/3/news/hot`  
-* 响应实例：
-
-        {
-            recent: [
-                {
-                    news_id: 3748552,
-                    url: "http://daily.zhihu.com/api/2/news/3748552",
-                    thumbnail: "http://p3.zhimg.com/67/6a/676a8337efec71a100eea6130482091b.jpg",
-                    title: "长得漂亮能力出众性格单纯的姑娘为什么会没有男朋友？"
-                },
-            ...
-            ]
-        }
-
-* 大体同前面介绍的 API 类似，唯一需要注意的是：欲获得图片地址，不再使用 `image` 而是 `thumbnail` 属性
-* `url` 属性可直接使用。请注意，`url` 中的 `api` 属性为 __2__，是较老版本。
-
-
-### 12. 软件推广
-* __请注意！__ 此 API 已无法访问，但是其内容曾出现于『知乎日报』 App 中。
-* Android: `http://news-at.zhihu.com/api/3/promotion/android`  
-* iOS: `http://news-at.zhihu.com/api/3/promotion/ios`
-
-
-### 13. 栏目总览
-* __请注意！__ 此 API 仍可访问，但是其内容未出现在最新的『知乎日报』 App 中。
-* URL: `http://news-at.zhihu.com/api/3/sections`  
-* 响应实例：
-
-        {
-            data: [
-                {
-                    id: 1,
-                    thumbnail: "http://p2.zhimg.com/10/b8/10b8193dd6a3404d31b2c50e1e232c87.jpg",
-                    name: "深夜食堂",
-                    description: "睡前宵夜，用别人的故事下酒"
-                },
-            ...
-            ]
-        }
-
-* 同样，注意使用 `thumbnail` 获取图像的地址
-
-
-### 14. 栏目具体消息查看
-* __请注意！__ 此 API 仍可访问，但是其内容未出现在最新的『知乎日报』 App 中。
-* URL: `http://news-at.zhihu.com/api/3/section/1`
-* URL 最后的数字见『栏目总览』中相应栏目的 `id` 属性
-* 响应实例：
-
-        {
-            news: [
-                {
-                    date: "20140522",
-                    display_date: "5 月 22 日"
-                },
-            ...
-            ],
-            name: "深夜食堂",
-            timestamp: 1398780001
-        }
-
-* 往前：`http://news-at.zhihu.com/api/3/section/1/before/1398780001`
-    * 在 URL 最后加上一个时间戳，时间戳详见 JSON 数据末端的 `timestamp` 属性
+EMOJI CHEAT SHEET
+
+
+Carbon Ads - a circle you want to be part of. Grab a spot.
+ads via Carbon
+Emoji emoticons listed on this page are supported on Campfire, GitHub, Basecamp, Redbooth, Trac, Flowdock, Sprint.ly, Kandan, Textbox.io, Kippt, Redmine, JabbR, Trello, Hall, Plug.dj, Qiita, Zendesk, Ruby China, Grove, Idobata, NodeBB Forums, Slack, Streamup, OrganisedMinds, Hackpad, Cryptbin, Kato, Reportedly, Cheerful Ghost, IRCCloud, Dashcube, MyVideoGameList, Subrosa, Sococo, Quip, And Bang, Bonusly, Discourse, Ello, Twemoji Awesome, Got Chosen, Flow, ReadMe.io, esa, DBook, Groups.io, TeamworkChat, Damn Bugs, Let's Chat, Buildkite, ChatGrape, Dokuwiki, Usersnap, Discord, Status Hero, Bitbucket, and Gitter.
+However some of the emoji codes are not super easy to remember, so here is a little cheat sheet.
+✈ Got flash enabled? Click the emoji code and it will be copied to your clipboard.
+
+    Tweet  
+People
+
+:bowtie:
+:smile:
+:laughing:
+:blush:
+:smiley:
+:relaxed:
+:smirk:
+:heart_eyes:
+:kissing_heart:
+:kissing_closed_eyes:
+:flushed:
+:relieved:
+:satisfied:
+:grin:
+:wink:
+:stuck_out_tongue_winking_eye:
+:stuck_out_tongue_closed_eyes:
+:grinning:
+:kissing:
+:kissing_smiling_eyes:
+:stuck_out_tongue:
+:sleeping:
+:worried:
+:frowning:
+:anguished:
+:open_mouth:
+:grimacing:
+:confused:
+:hushed:
+:expressionless:
+:unamused:
+:sweat_smile:
+:sweat:
+:disappointed_relieved:
+:weary:
+:pensive:
+:disappointed:
+:confounded:
+:fearful:
+:cold_sweat:
+:persevere:
+:cry:
+:sob:
+:joy:
+:astonished:
+:scream:
+:neckbeard:
+:tired_face:
+:angry:
+:rage:
+:triumph:
+:sleepy:
+:yum:
+:mask:
+:sunglasses:
+:dizzy_face:
+:imp:
+:smiling_imp:
+:neutral_face:
+:no_mouth:
+:innocent:
+:alien:
+:yellow_heart:
+:blue_heart:
+:purple_heart:
+:heart:
+:green_heart:
+:broken_heart:
+:heartbeat:
+:heartpulse:
+:two_hearts:
+:revolving_hearts:
+:cupid:
+:sparkling_heart:
+:sparkles:
+:star:
+:star2:
+:dizzy:
+:boom:
+:collision:
+:anger:
+:exclamation:
+:question:
+:grey_exclamation:
+:grey_question:
+:zzz:
+:dash:
+:sweat_drops:
+:notes:
+:musical_note:
+:fire:
+:hankey:
+:poop:
+:shit:
+:+1:
+:thumbsup:
+:-1:
+:thumbsdown:
+:ok_hand:
+:punch:
+:facepunch:
+:fist:
+:v:
+:wave:
+:hand:
+:raised_hand:
+:open_hands:
+:point_up:
+:point_down:
+:point_left:
+:point_right:
+:raised_hands:
+:pray:
+:point_up_2:
+:clap:
+:muscle:
+:metal:
+:fu:
+:runner:
+:running:
+:couple:
+:family:
+:two_men_holding_hands:
+:two_women_holding_hands:
+:dancer:
+:dancers:
+:ok_woman:
+:no_good:
+:information_desk_person:
+:raising_hand:
+:bride_with_veil:
+:person_with_pouting_face:
+:person_frowning:
+:bow:
+:couplekiss:
+:couple_with_heart:
+:massage:
+:haircut:
+:nail_care:
+:boy:
+:girl:
+:woman:
+:man:
+:baby:
+:older_woman:
+:older_man:
+:person_with_blond_hair:
+:man_with_gua_pi_mao:
+:man_with_turban:
+:construction_worker:
+:cop:
+:angel:
+:princess:
+:smiley_cat:
+:smile_cat:
+:heart_eyes_cat:
+:kissing_cat:
+:smirk_cat:
+:scream_cat:
+:crying_cat_face:
+:joy_cat:
+:pouting_cat:
+:japanese_ogre:
+:japanese_goblin:
+:see_no_evil:
+:hear_no_evil:
+:speak_no_evil:
+:guardsman:
+:skull:
+:feet:
+:lips:
+:kiss:
+:droplet:
+:ear:
+:eyes:
+:nose:
+:tongue:
+:love_letter:
+:bust_in_silhouette:
+:busts_in_silhouette:
+:speech_balloon:
+:thought_balloon:
+:feelsgood:
+:finnadie:
+:goberserk:
+:godmode:
+:hurtrealbad:
+:rage1:
+:rage2:
+:rage3:
+:rage4:
+:suspect:
+:trollface:
+Nature
+
+:sunny:
+:umbrella:
+:cloud:
+:snowflake:
+:snowman:
+:zap:
+:cyclone:
+:foggy:
+:ocean:
+:cat:
+:dog:
+:mouse:
+:hamster:
+:rabbit:
+:wolf:
+:frog:
+:tiger:
+:koala:
+:bear:
+:pig:
+:pig_nose:
+:cow:
+:boar:
+:monkey_face:
+:monkey:
+:horse:
+:racehorse:
+:camel:
+:sheep:
+:elephant:
+:panda_face:
+:snake:
+:bird:
+:baby_chick:
+:hatched_chick:
+:hatching_chick:
+:chicken:
+:penguin:
+:turtle:
+:bug:
+:honeybee:
+:ant:
+:beetle:
+:snail:
+:octopus:
+:tropical_fish:
+:fish:
+:whale:
+:whale2:
+:dolphin:
+:cow2:
+:ram:
+:rat:
+:water_buffalo:
+:tiger2:
+:rabbit2:
+:dragon:
+:goat:
+:rooster:
+:dog2:
+:pig2:
+:mouse2:
+:ox:
+:dragon_face:
+:blowfish:
+:crocodile:
+:dromedary_camel:
+:leopard:
+:cat2:
+:poodle:
+:paw_prints:
+:bouquet:
+:cherry_blossom:
+:tulip:
+:four_leaf_clover:
+:rose:
+:sunflower:
+:hibiscus:
+:maple_leaf:
+:leaves:
+:fallen_leaf:
+:herb:
+:mushroom:
+:cactus:
+:palm_tree:
+:evergreen_tree:
+:deciduous_tree:
+:chestnut:
+:seedling:
+:blossom:
+:ear_of_rice:
+:shell:
+:globe_with_meridians:
+:sun_with_face:
+:full_moon_with_face:
+:new_moon_with_face:
+:new_moon:
+:waxing_crescent_moon:
+:first_quarter_moon:
+:waxing_gibbous_moon:
+:full_moon:
+:waning_gibbous_moon:
+:last_quarter_moon:
+:waning_crescent_moon:
+:last_quarter_moon_with_face:
+:first_quarter_moon_with_face:
+:crescent_moon:
+:earth_africa:
+:earth_americas:
+:earth_asia:
+:volcano:
+:milky_way:
+:partly_sunny:
+:octocat:
+:squirrel:
+Objects
+
+:bamboo:
+:gift_heart:
+:dolls:
+:school_satchel:
+:mortar_board:
+:flags:
+:fireworks:
+:sparkler:
+:wind_chime:
+:rice_scene:
+:jack_o_lantern:
+:ghost:
+:santa:
+:christmas_tree:
+:gift:
+:bell:
+:no_bell:
+:tanabata_tree:
+:tada:
+:confetti_ball:
+:balloon:
+:crystal_ball:
+:cd:
+:dvd:
+:floppy_disk:
+:camera:
+:video_camera:
+:movie_camera:
+:computer:
+:tv:
+:iphone:
+:phone:
+:telephone:
+:telephone_receiver:
+:pager:
+:fax:
+:minidisc:
+:vhs:
+:sound:
+:speaker:
+:mute:
+:loudspeaker:
+:mega:
+:hourglass:
+:hourglass_flowing_sand:
+:alarm_clock:
+:watch:
+:radio:
+:satellite:
+:loop:
+:mag:
+:mag_right:
+:unlock:
+:lock:
+:lock_with_ink_pen:
+:closed_lock_with_key:
+:key:
+:bulb:
+:flashlight:
+:high_brightness:
+:low_brightness:
+:electric_plug:
+:battery:
+:calling:
+:email:
+:mailbox:
+:postbox:
+:bath:
+:bathtub:
+:shower:
+:toilet:
+:wrench:
+:nut_and_bolt:
+:hammer:
+:seat:
+:moneybag:
+:yen:
+:dollar:
+:pound:
+:euro:
+:credit_card:
+:money_with_wings:
+:e-mail:
+:inbox_tray:
+:outbox_tray:
+:envelope:
+:incoming_envelope:
+:postal_horn:
+:mailbox_closed:
+:mailbox_with_mail:
+:mailbox_with_no_mail:
+:package:
+:door:
+:smoking:
+:bomb:
+:gun:
+:hocho:
+:pill:
+:syringe:
+:page_facing_up:
+:page_with_curl:
+:bookmark_tabs:
+:bar_chart:
+:chart_with_upwards_trend:
+:chart_with_downwards_trend:
+:scroll:
+:clipboard:
+:calendar:
+:date:
+:card_index:
+:file_folder:
+:open_file_folder:
+:scissors:
+:pushpin:
+:paperclip:
+:black_nib:
+:pencil2:
+:straight_ruler:
+:triangular_ruler:
+:closed_book:
+:green_book:
+:blue_book:
+:orange_book:
+:notebook:
+:notebook_with_decorative_cover:
+:ledger:
+:books:
+:bookmark:
+:name_badge:
+:microscope:
+:telescope:
+:newspaper:
+:football:
+:basketball:
+:soccer:
+:baseball:
+:tennis:
+:8ball:
+:8ball:
+:rugby_football:
+:bowling:
+:golf:
+:mountain_bicyclist:
+:bicyclist:
+:horse_racing:
+:snowboarder:
+:swimmer:
+:surfer:
+:ski:
+:spades:
+:hearts:
+:clubs:
+:diamonds:
+:gem:
+:ring:
+:trophy:
+:musical_score:
+:musical_keyboard:
+:violin:
+:space_invader:
+:video_game:
+:black_joker:
+:flower_playing_cards:
+:game_die:
+:dart:
+:mahjong:
+:clapper:
+:memo:
+:pencil:
+:book:
+:art:
+:microphone:
+:headphones:
+:trumpet:
+:saxophone:
+:guitar:
+:shoe:
+:sandal:
+:high_heel:
+:lipstick:
+:boot:
+:shirt:
+:tshirt:
+:necktie:
+:womans_clothes:
+:dress:
+:running_shirt_with_sash:
+:jeans:
+:kimono:
+:bikini:
+:ribbon:
+:tophat:
+:crown:
+:womans_hat:
+:mans_shoe:
+:closed_umbrella:
+:briefcase:
+:handbag:
+:pouch:
+:purse:
+:eyeglasses:
+:fishing_pole_and_fish:
+:coffee:
+:tea:
+:sake:
+:baby_bottle:
+:beer:
+:beers:
+:cocktail:
+:tropical_drink:
+:wine_glass:
+:fork_and_knife:
+:pizza:
+:hamburger:
+:fries:
+:poultry_leg:
+:meat_on_bone:
+:spaghetti:
+:curry:
+:fried_shrimp:
+:bento:
+:sushi:
+:fish_cake:
+:rice_ball:
+:rice_cracker:
+:rice:
+:ramen:
+:stew:
+:oden:
+:dango:
+:egg:
+:bread:
+:doughnut:
+:custard:
+:icecream:
+:ice_cream:
+:shaved_ice:
+:birthday:
+:cake:
+:cookie:
+:chocolate_bar:
+:candy:
+:lollipop:
+:honey_pot:
+:apple:
+:green_apple:
+:tangerine:
+:lemon:
+:cherries:
+:grapes:
+:watermelon:
+:strawberry:
+:peach:
+:melon:
+:banana:
+:pear:
+:pineapple:
+:sweet_potato:
+:eggplant:
+:tomato:
+:corn:
+Places
+
+:house:
+:house_with_garden:
+:school:
+:office:
+:post_office:
+:hospital:
+:bank:
+:convenience_store:
+:love_hotel:
+:hotel:
+:wedding:
+:church:
+:department_store:
+:european_post_office:
+:city_sunrise:
+:city_sunset:
+:japanese_castle:
+:european_castle:
+:tent:
+:factory:
+:tokyo_tower:
+:japan:
+:mount_fuji:
+:sunrise_over_mountains:
+:sunrise:
+:stars:
+:statue_of_liberty:
+:bridge_at_night:
+:carousel_horse:
+:rainbow:
+:ferris_wheel:
+:fountain:
+:roller_coaster:
+:ship:
+:speedboat:
+:boat:
+:sailboat:
+:rowboat:
+:anchor:
+:rocket:
+:airplane:
+:helicopter:
+:steam_locomotive:
+:tram:
+:mountain_railway:
+:bike:
+:aerial_tramway:
+:suspension_railway:
+:mountain_cableway:
+:tractor:
+:blue_car:
+:oncoming_automobile:
+:car:
+:red_car:
+:taxi:
+:oncoming_taxi:
+:articulated_lorry:
+:bus:
+:oncoming_bus:
+:rotating_light:
+:police_car:
+:oncoming_police_car:
+:fire_engine:
+:ambulance:
+:minibus:
+:truck:
+:train:
+:station:
+:train2:
+:bullettrain_front:
+:bullettrain_side:
+:light_rail:
+:monorail:
+:railway_car:
+:trolleybus:
+:ticket:
+:fuelpump:
+:vertical_traffic_light:
+:traffic_light:
+:warning:
+:construction:
+:beginner:
+:atm:
+:slot_machine:
+:busstop:
+:barber:
+:hotsprings:
+:checkered_flag:
+:crossed_flags:
+:izakaya_lantern:
+:moyai:
+:circus_tent:
+:performing_arts:
+:round_pushpin:
+:triangular_flag_on_post:
+:jp:
+:kr:
+:cn:
+:us:
+:fr:
+:es:
+:it:
+:ru:
+:gb:
+:uk:
+:de:
+Symbols
+
+:one:
+:two:
+:three:
+:four:
+:five:
+:six:
+:seven:
+:eight:
+:nine:
+:keycap_ten:
+:1234:
+:zero:
+:hash:
+:symbols:
+:arrow_backward:
+:arrow_down:
+:arrow_forward:
+:arrow_left:
+:capital_abcd:
+:abcd:
+:abc:
+:arrow_lower_left:
+:arrow_lower_right:
+:arrow_right:
+:arrow_up:
+:arrow_upper_left:
+:arrow_upper_right:
+:arrow_double_down:
+:arrow_double_up:
+:arrow_down_small:
+:arrow_heading_down:
+:arrow_heading_up:
+:leftwards_arrow_with_hook:
+:arrow_right_hook:
+:left_right_arrow:
+:arrow_up_down:
+:arrow_up_small:
+:arrows_clockwise:
+:arrows_counterclockwise:
+:rewind:
+:fast_forward:
+:information_source:
+:ok:
+:twisted_rightwards_arrows:
+:repeat:
+:repeat_one:
+:new:
+:top:
+:up:
+:cool:
+:free:
+:ng:
+:cinema:
+:koko:
+:signal_strength:
+:u5272:
+:u5408:
+:u55b6:
+:u6307:
+:u6708:
+:u6709:
+:u6e80:
+:u7121:
+:u7533:
+:u7a7a:
+:u7981:
+:sa:
+:restroom:
+:mens:
+:womens:
+:baby_symbol:
+:no_smoking:
+:parking:
+:wheelchair:
+:metro:
+:baggage_claim:
+:accept:
+:wc:
+:potable_water:
+:put_litter_in_its_place:
+:secret:
+:congratulations:
+:m:
+:passport_control:
+:left_luggage:
+:customs:
+:ideograph_advantage:
+:cl:
+:sos:
+:id:
+:no_entry_sign:
+:underage:
+:no_mobile_phones:
+:do_not_litter:
+:non-potable_water:
+:no_bicycles:
+:no_pedestrians:
+:children_crossing:
+:no_entry:
+:eight_spoked_asterisk:
+:sparkle:
+:eight_pointed_black_star:
+:heart_decoration:
+:vs:
+:vibration_mode:
+:mobile_phone_off:
+:chart:
+:currency_exchange:
+:aries:
+:taurus:
+:gemini:
+:cancer:
+:leo:
+:virgo:
+:libra:
+:scorpius:
+:sagittarius:
+:capricorn:
+:aquarius:
+:pisces:
+:ophiuchus:
+:six_pointed_star:
+:negative_squared_cross_mark:
+:a:
+:b:
+:ab:
+:o2:
+:diamond_shape_with_a_dot_inside:
+:recycle:
+:end:
+:back:
+:on:
+:soon:
+:clock1:
+:clock130:
+:clock10:
+:clock1030:
+:clock11:
+:clock1130:
+:clock12:
+:clock1230:
+:clock2:
+:clock230:
+:clock3:
+:clock330:
+:clock4:
+:clock430:
+:clock5:
+:clock530:
+:clock6:
+:clock630:
+:clock7:
+:clock730:
+:clock8:
+:clock830:
+:clock9:
+:clock930:
+:heavy_dollar_sign:
+:copyright:
+:registered:
+:tm:
+:x:
+:heavy_exclamation_mark:
+:bangbang:
+:interrobang:
+:o:
+:heavy_multiplication_x:
+:heavy_plus_sign:
+:heavy_minus_sign:
+:heavy_division_sign:
+:white_flower:
+:100:
+:heavy_check_mark:
+:ballot_box_with_check:
+:radio_button:
+:link:
+:curly_loop:
+:wavy_dash:
+:part_alternation_mark:
+:trident:
+:black_small_square:
+:white_small_square:
+:black_medium_small_square:
+:white_medium_small_square:
+:black_medium_square:
+:white_medium_square:
+:black_large_square:
+:white_large_square:
+:white_check_mark:
+:black_square_button:
+:white_square_button:
+:black_circle:
+:white_circle:
+:red_circle:
+:large_blue_circle:
+:large_blue_diamond:
+:large_orange_diamond:
+:small_blue_diamond:
+:small_orange_diamond:
+:small_red_triangle:
+:small_red_triangle_down:
+:shipit:
+Campfire also supports a few sounds
+
+/play secret/play trombone/play crickets/play rimshot/play vuvuzela/play tmyk/play live/play drama/play yeah/play greatjob/play pushit/play nyan/play tada/play ohmy/play bueller/play ohyeah/play 56k/play dangerzone/play horn/play horror/play loggins/play yodel/play sax/play noooo/play heygirl/play inconceivable/play deeper/play whoomp/play clowntown/play what/play bezos/play trololo/play makeitso/play sexyback/play bell/play danielsan/play greyjoy/play story/play dadgummit/play rollout/play cottoneyejoe/play rumble/play guarantee/play unix/play letitgo/play wups/play flawless/play butts
+This page was created by Arvid Andersson / @arvid_a at Oktavilla. Source code is available on GitHub.
+
+❤ View all the super awesome people that have contributed to this page on the GitHub contributors page.
+✔ Emoji-cheat-sheet.com is not affiliated with the services listed on this page in any way.
+♺ Built using bits from zClip, jnotify.
