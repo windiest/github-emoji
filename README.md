@@ -2,7 +2,7 @@
 
 Use a colon to the front and rear surround expression syntax designations.
 ```php
-: b l u s h : 会显示成【记得把里面的空格去掉】
+:blush: 会显示成【记得把里面的空格去掉】
 
 : b l u s h : It will be displayed as【Remember to remove the spaces inside】
 ```
