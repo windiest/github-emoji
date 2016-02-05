@@ -1,10 +1,13 @@
 使用方法为前后冒号包围表情代号的句法。
 
 Use a colon to the front and rear surround expression syntax designations.
-:blush:
+
 ```php
 :blush:
 ```
+上面的字母会显示为这个表情 :blush:
+
+It will be displayed as :blush:
 
 所以你在提交代码的时候可以这样写提交信息：
 
